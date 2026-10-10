@@ -36,10 +36,10 @@ test('native connection failure codes identify server, Internet and cleanup fail
 
 function simulate(mode) {
   const helper = connectionScript('Fake-WireGuard', 'Fake-Wg', 'Fake-Curl', 'avpn12345678', 'profile.conf')
-    .replace('exit $result', 'Write-Output ("AERO_RESULT:" + (@{ code=$result; active=$global:active; keepalive=$global:keepalive; probes=$global:probes } | ConvertTo-Json -Compress))');
+    .replace('exit $result', 'Write-Output ("AERO_RESULT:" + (@{ code=$result; active=$global:active; keepalive=$global:mockKeepalive; probes=$global:probes } | ConvertTo-Json -Compress))');
   const harness = String.raw`
 $global:active=$false
-$global:keepalive=25
+$global:mockKeepalive=25
 $global:probes=0
 $global:mode='${mode}'
 function Fake-WireGuard {
@@ -54,9 +54,9 @@ function Fake-WireGuard {
 }
 function Fake-Wg {
   $global:LASTEXITCODE=0
-  if ($args[0] -eq 'set') { $global:keepalive=[int]$args[5] }
+  if ($args[0] -eq 'set') { $global:mockKeepalive=[int]$args[5] }
   elseif ($args[2] -eq 'peers') { 'synthetic-peer' }
-  elseif ($args[2] -eq 'persistent-keepalive') { 'synthetic-peer' + [char]9 + $global:keepalive }
+  elseif ($args[2] -eq 'persistent-keepalive') { 'synthetic-peer' + [char]9 + $global:mockKeepalive }
   elseif ($args[2] -eq 'latest-handshakes') {
     if ($global:mode -eq 'no-handshake') { 'synthetic-peer' + [char]9 + '0' }
     else { 'synthetic-peer' + [char]9 + '1234567890' }

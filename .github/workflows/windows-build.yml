@@ -23,7 +23,15 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-fund
       - name: Run tests
-        run: npm test
+        run: |
+          npm test 2>&1 | Tee-Object -FilePath test-output.txt
+          $testExit = $LASTEXITCODE
+          if ($testExit -ne 0) {
+            $detail = (Get-Content test-output.txt | Select-Object -Last 80) -join "`n"
+            $detail = $detail.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+            Write-Output "::error title=Windows test failure::$detail"
+          }
+          exit $testExit
       - name: Build portable Windows app
         run: npm run dist:win
       - name: Upload download
