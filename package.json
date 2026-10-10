@@ -1,6 +1,6 @@
 {
   "name": "aero-vpn",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A privacy-focused WireGuard desktop client with measured route latency",
   "private": true,
   "main": "desktop/main.cjs",

@@ -109,7 +109,7 @@
     $('#power-button').disabled = busy || (!active && (!profile || !state.engine.available));
     $('#power-button').setAttribute('aria-label', active ? 'Disconnect VPN' : 'Connect VPN');
     $('#connection-title').textContent = active ? 'Your tunnel is running.' : profile ? 'Ready when you are.' : 'A connection of your own.';
-    $('#connection-subtitle').textContent = busy ? 'Complete any system approval prompt.' : active ? 'Peer handshake and reachability are not verified.' : profile ? state.engine.available ? `Connect to ${profile.name}.` : 'Install WireGuard to enable your connection.' : 'Import a server profile to get started.';
+    $('#connection-subtitle').textContent = busy ? 'Approve the prompt. Checking the server and tunnel…' : active ? state.peerVerified ? 'Peer handshake verified when this session connected.' : 'Existing tunnel: peer and reachability not verified.' : profile ? state.engine.available ? `Connect to ${profile.name}.` : 'Install WireGuard to enable your connection.' : 'Import a server profile to get started.';
     $('#connection-footer').textContent = active ? 'Routing and DNS follow your profile' : 'Your keys stay on this device';
     const connect = $('#connect-button');
     connect.disabled = busy || (!!profile && !active && !state.engine.available);
@@ -154,7 +154,7 @@
           if (fastest) selectedId = fastest.id;
         }
         apply(await call('connect', selectedId));
-        notify('System tunnel active. Verify the peer handshake in WireGuard.');
+        notify(state.peerVerified ? 'Server handshake verified. Connection checks passed.' : 'System tunnel active. Verify the peer handshake in WireGuard.');
       }
     } catch (error) { notify(error.message, true); try { apply(await call('state')); } catch {} }
     finally { operation = false; render(); }

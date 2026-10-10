@@ -26,7 +26,8 @@ npm run dist:win
 
 ## Connection and latency behavior
 
-- Windows connections call the official `wireguard.exe /installtunnelservice` and `/uninstalltunnelservice` commands through a UAC-approved process. The app checks the named service before reporting **tunnel active**. This does not verify a peer handshake or Internet reachability; inspect the official WireGuard client and test your intended destination.
+- Windows connections run in a UAC-approved process. After starting the service, Aero checks for a WireGuard peer handshake for up to 30 seconds. A temporary one-second keepalive triggers traffic for this check; the original keepalive is restored before success. Full-tunnel profiles also perform bounded, certificate-verified HTTPS checks against Microsoft and Cloudflare, bound to the tunnel's assigned source address. No private key is sent to either site. If verification fails, the elevated process removes the tunnel and falls back to stopping its service; Aero reports any cleanup it cannot confirm. Profiles that intentionally block both check sites can fail this check even if other sites work.
+- The UI distinguishes a handshake verified at connection time from a pre-existing tunnel discovered after restart. It does not continuously verify connectivity or automatically disconnect on later Internet failures. Split-tunnel profiles get a peer check but no public Internet test, since their public traffic may intentionally bypass the VPN.
 - Latency is the average of three ICMP probes to each configured endpoint. Servers may block ICMP while still accepting WireGuard UDP. Measurements are not VPN throughput or a latency guarantee, and checking through an existing tunnel changes the measured path.
 - WireGuard uses the profile’s MTU, DNS, routes, and keepalive configuration. The app does not arbitrarily reduce MTU or claim to eliminate distance and network congestion. Prefer a nearby, uncongested server and measure while disconnected.
 - Closing the app can leave a tunnel running after a confirmation. On relaunch, the client detects its own existing tunnel services. It does not manage tunnels created by other WireGuard clients.
@@ -39,6 +40,14 @@ Import accepts one Interface and one Peer section with normal WireGuard client f
 Profiles are stored under Electron’s user-data folder (`%APPDATA%/Aero VPN/profiles` or `%APPDATA%/aero-vpn/profiles`, depending on the packaged name). The desktop account’s directory permissions protect them on Windows; Unix files are created with mode `0600` in a `0700` directory. Administrators and processes running as your account can still read them. The app needs a plaintext file for the native WireGuard installer; it is not an encrypted password vault. Backups of your application folder can contain private keys.
 
 Private keys never enter the renderer, analytics, or network requests. The app has no analytics or remote interface assets. Windows WireGuard is responsible for protecting its own installed service configuration.
+
+## Wi-Fi stays connected but Internet stops
+
+1. Disconnect Aero to restore your previous routes. If it cannot disconnect, open **PowerShell as administrator** and run `Get-Service -Name 'WireGuardTunnel$avpn*' -ErrorAction SilentlyContinue | Stop-Service`. This stops Aero's tunnel services, without resetting the Wi-Fi adapter.
+2. With Aero disconnected, test the same `.conf` in the official WireGuard app. If it also fails there, check the server's availability, UDP endpoint, matching peer keys, client address, forwarding/NAT, and DNS. A profile file alone does not provide a VPN server.
+3. Version 0.1.1 adds handshake verification and rollback of failed connections. If the peer responds but Internet verification fails, inspect the server's forwarding/NAT and DNS; also consider whether either test site is blocked. A successful initial check does not guarantee that every destination or future connection will work.
+
+Keep private keys and preshared keys out of screenshots, chat, and public issues.
 
 ## Other platforms
 

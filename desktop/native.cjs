@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFile } = require('node:child_process');
+const { connectionScript } = require('./windows-connect.cjs');
 
 function run(file, args, options = {}) {
   return new Promise((resolve, reject) => {
@@ -23,9 +24,11 @@ class NativeWireGuard {
       ? ['/opt/homebrew/bin/wg-quick', '/usr/local/bin/wg-quick'].find(p => fs.existsSync(p))
       : ['/usr/bin/wg-quick', '/usr/local/bin/wg-quick'].find(p => fs.existsSync(p));
     this.windowsExe = platform === 'win32' ? path.join(process.env.ProgramFiles || 'C:\\Program Files', 'WireGuard', 'wireguard.exe') : null;
+    this.wgExe = platform === 'win32' ? path.join(process.env.ProgramFiles || 'C:\\Program Files', 'WireGuard', 'wg.exe') : null;
+    this.curlExe = platform === 'win32' ? path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'curl.exe') : null;
   }
   availability() {
-    if (this.platform === 'win32') return { available: fs.existsSync(this.windowsExe), platform: 'Windows', instructions: 'Install the official WireGuard for Windows client, then restart Aero VPN.' };
+    if (this.platform === 'win32') return { available: fs.existsSync(this.windowsExe) && fs.existsSync(this.wgExe), platform: 'Windows', instructions: 'Install the official WireGuard for Windows client (including wg.exe), then restart Aero VPN.' };
     if (this.platform === 'linux') return { available: !!this.quick && fs.existsSync('/usr/bin/pkexec') && fs.existsSync('/usr/sbin/ip'), platform: 'Linux', instructions: 'Install wireguard-tools, iproute2, a polkit authentication agent, and resolvconf if your profile specifies DNS.' };
     if (this.platform === 'darwin') return { available: !!this.quick, platform: 'macOS', instructions: 'Install wireguard-tools and wireguard-go with Homebrew. Administrator approval is required when connecting.' };
     return { available: false, platform: this.platform, instructions: 'This operating system is not supported.' };
@@ -41,9 +44,24 @@ class NativeWireGuard {
       const command = `${sq(this.quick)} ${action} ${sq(configPath)}`;
       await this.execute('/usr/bin/osascript', ['-e', `do shell script ${JSON.stringify(command)} with administrator privileges`], { timeout: 120000 });
     } else {
-      const arg = action === 'up' ? `/installtunnelservice "${configPath}"` : `/uninstalltunnelservice ${id}`;
-      const script = `$p = Start-Process -FilePath ${quotePS(this.windowsExe)} -ArgumentList ${quotePS(arg)} -Verb RunAs -Wait -PassThru; exit $p.ExitCode`;
-      await this.execute('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script], { timeout: 120000 });
+      let script;
+      if (action === 'up') {
+        const encoded = Buffer.from(connectionScript(this.windowsExe, this.wgExe, this.curlExe, id, configPath), 'utf16le').toString('base64');
+        script = `$p = Start-Process -FilePath (Join-Path $PSHOME 'powershell.exe') -ArgumentList '-NoProfile -NonInteractive -EncodedCommand ${encoded}' -Verb RunAs -Wait -PassThru; exit $p.ExitCode`;
+      } else {
+        script = `$p = Start-Process -FilePath ${quotePS(this.windowsExe)} -ArgumentList ${quotePS(`/uninstalltunnelservice ${id}`)} -Verb RunAs -Wait -PassThru; exit $p.ExitCode`;
+      }
+      try {
+        await this.execute('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script], { timeout: action === 'up' ? 240000 : 120000 });
+      } catch (error) {
+        const messages = {
+          20: 'The VPN server did not complete a handshake within 30 seconds. Aero stopped the tunnel. Check the server endpoint, keys, and UDP access.',
+          21: 'The VPN peer responded, but the tunnel Internet check failed. Aero stopped the tunnel. Check server forwarding/NAT, DNS, and routes, or whether the test sites are blocked.',
+          22: 'The connection failed and Windows could not stop the tunnel. Disconnect it in Aero or stop the Aero WireGuard service as administrator.',
+          23: 'WireGuard could not start or verify the tunnel. Check its installation and profile. Any tunnel started by this attempt was stopped.'
+        };
+        throw new Error(messages[error.code] || error.message);
+      }
     }
   }
   async isActive(id) {

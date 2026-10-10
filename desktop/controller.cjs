@@ -6,6 +6,7 @@ class VpnController {
     this.busy = false;
     this.startedAt = null;
     this.latencies = {};
+    this.verifiedId = null;
   }
   async state() {
     const profiles = await this.store.list();
@@ -16,13 +17,15 @@ class VpnController {
       const previousId = this.activeId;
       this.activeId = active[0] || null;
       if (!this.activeId) this.startedAt = null;
+      if (this.activeId !== this.verifiedId) this.verifiedId = null;
       else if (this.activeId !== previousId) this.startedAt = Date.now();
     }
-    return { profiles: profiles.map(p => ({ ...p, latency: this.latencies[p.id] || null })), activeId: this.activeId, busy: this.busy, startedAt: this.startedAt, engine: this.driver.availability() };
+    return { profiles: profiles.map(p => ({ ...p, latency: this.latencies[p.id] || null })), activeId: this.activeId, peerVerified: !!this.activeId && this.verifiedId === this.activeId, busy: this.busy, startedAt: this.startedAt, engine: this.driver.availability() };
   }
   async connect(id) {
     if (this.busy) throw new Error('A tunnel operation is already in progress.');
     this.busy = true;
+    let attempted = false;
     try {
       const profiles = await this.store.list();
       for (const profile of profiles) {
@@ -31,10 +34,25 @@ class VpnController {
       this.store.configPath(id);
       if (!profiles.some(p => p.id === id)) throw new Error('Profile not found.');
       await this.store.validate(id);
+      attempted = true;
       await this.driver.change('up', id, this.store.configPath(id));
       if (!await this.waitForStatus(id, true)) throw new Error('The system did not report an active tunnel. Check WireGuard and try again.');
       this.activeId = id;
       this.startedAt = Date.now();
+      this.verifiedId = this.driver.platform === 'win32' ? id : null;
+    } catch (error) {
+      this.verifiedId = null;
+      if (attempted) {
+        try {
+          if (await this.driver.isActive(id)) {
+            await this.driver.change('down', id, this.store.configPath(id));
+            if (!await this.waitForStatus(id, false)) throw new Error('Tunnel is still active.');
+          }
+        } catch {
+          throw new Error(`${error.message} Automatic cleanup could not be confirmed. Use Disconnect or stop the Aero WireGuard service as administrator.`);
+        }
+      }
+      throw error;
     } finally { this.busy = false; }
     return this.state();
   }
@@ -52,6 +70,7 @@ class VpnController {
       if (!await this.waitForStatus(id, false)) throw new Error('The tunnel is still active. Disconnect it with WireGuard before exiting.');
       this.activeId = null;
       this.startedAt = null;
+      this.verifiedId = null;
       }
     } finally { this.busy = false; }
     return this.state();
