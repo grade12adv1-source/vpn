@@ -17,8 +17,8 @@ class VpnController {
       const previousId = this.activeId;
       this.activeId = active[0] || null;
       if (!this.activeId) this.startedAt = null;
-      if (this.activeId !== this.verifiedId) this.verifiedId = null;
       else if (this.activeId !== previousId) this.startedAt = Date.now();
+      if (this.activeId !== this.verifiedId) this.verifiedId = null;
     }
     return { profiles: profiles.map(p => ({ ...p, latency: this.latencies[p.id] || null })), activeId: this.activeId, peerVerified: !!this.activeId && this.verifiedId === this.activeId, busy: this.busy, startedAt: this.startedAt, engine: this.driver.availability() };
   }

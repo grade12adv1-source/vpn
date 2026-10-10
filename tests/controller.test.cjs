@@ -41,7 +41,10 @@ test('recovers after administrator approval is declined', async () => {
 test('detects an existing tunnel after restarting and refuses a second connection', async () => {
   const { controller, setRunning, calls } = fixture();
   setRunning(true);
-  assert.equal((await controller.state()).activeId, 'avpn12345678');
+  const restored = await controller.state();
+  assert.equal(restored.activeId, 'avpn12345678');
+  assert.ok(restored.startedAt);
+  assert.equal(restored.peerVerified, false);
   await assert.rejects(controller.connect('avpn12345678'), /Disconnect/);
   assert.equal(calls.length, 0);
   await assert.rejects(controller.remove('avpn12345678'), /Disconnect/);
