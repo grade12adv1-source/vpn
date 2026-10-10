@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Aero VPN</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 6h14M5 18h14"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="16" cy="17" r="3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5"/></symbol>
+    <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v9M6 6a9 9 0 1 0 12 0"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="m13 2-9 12h7l-1 8 10-13h-7l1-7Z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 8a8 8 0 0 0-13-4L3 8m0-5v5h5M4 16a8 8 0 0 0 13 4l4-4m0 5v-5h-5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7V4h6l3 3h9v13H3V7Z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></symbol>
+  </defs></svg>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#overview" aria-label="Aero VPN overview"><span class="brand-mark">a<span></span></span><span>aero<span class="brand-vpn">VPN</span></span></a>
+      <div class="workspace-label">YOUR WORKSPACE</div>
+      <nav aria-label="Main navigation">
+        <button class="nav-item active" data-page="overview"><svg><use href="#i-grid"/></svg>Overview<span class="nav-dot"></span></button>
+        <button class="nav-item" data-page="profiles"><svg><use href="#i-globe"/></svg>Server profiles<span id="profile-count" class="nav-count">0</span></button>
+        <button class="nav-item" data-page="settings"><svg><use href="#i-sliders"/></svg>Preferences</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="protocol-card"><div class="protocol-icon"><svg><use href="#i-bolt"/></svg></div><strong>Small protocol.<br>Big possibilities.</strong><p>Built on WireGuard.<br>Made to stay out of your way.</p><span>WIREGUARD ENGINE <span class="tiny-dot"></span></span></div>
+        <button class="help-button" data-page="help"><svg><use href="#i-info"/></svg>Setup guide<svg class="help-arrow"><use href="#i-arrow"/></svg></button>
+        <div class="version"><span class="version-dot"></span>Aero desktop<span>v0.1.0</span></div>
+      </div>
+    </aside>
+    <main>
+      <header class="topbar"><div><span class="breadcrumb">WORKSPACE</span><span class="breadcrumb-slash">/</span><span id="breadcrumb-page">Overview</span></div><span class="local-pill"><svg><use href="#i-lock"/></svg>Locally managed</span></header>
+      <div class="content">
+        <section class="page" id="page-overview">
+          <div class="page-heading"><div><div class="eyebrow">A LITTLE MORE FREEDOM</div><h1>Your private lane.</h1><p>A simpler connection. A clearer path.</p></div><button class="button button-secondary import-button"><svg><use href="#i-plus"/></svg>Import profile</button></div>
+          <div class="connection-layout">
+            <article class="connection-card card">
+              <div class="card-topline"><span><span id="status-dot" class="status-dot"></span><span id="connection-label">DISCONNECTED</span></span><span class="small-tag">WIREGUARD</span></div>
+              <button id="power-button" class="power-orb" aria-label="Connect VPN" disabled><span class="orb-ring ring-one"></span><span class="orb-ring ring-two"></span><span class="orb-inner"><svg><use href="#i-power"/></svg></span></button>
+              <h2 id="connection-title">A connection of your own.</h2><p class="connection-subtitle" id="connection-subtitle">Import a server profile to get started.</p>
+              <button id="connect-button" class="button button-primary connect-button"><svg><use href="#i-upload"/></svg><span>Import your first profile</span><svg class="button-arrow"><use href="#i-arrow"/></svg></button>
+              <div class="connection-footer"><svg><use href="#i-shield"/></svg><span id="connection-footer">Your keys stay on this device</span></div>
+            </article>
+            <article class="route-card card">
+              <div class="route-heading"><div class="eyebrow">YOUR NEXT CONNECTION</div><span class="outline-tag">UDP PROTOCOL</span></div>
+              <h2>Less overhead.<br>More open road.</h2><p>Choose your server. Let WireGuard<br>handle the connection.</p>
+              <div class="map-art" aria-hidden="true">
+                <svg viewBox="0 0 640 310"><defs><pattern id="map-dots" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#37525a"/></pattern><radialGradient id="map-glow"><stop offset="0" stop-color="#55dfad" stop-opacity=".19"/><stop offset="1" stop-color="#55dfad" stop-opacity="0"/></radialGradient></defs><ellipse cx="338" cy="150" rx="210" ry="150" fill="url(#map-glow)"/><g fill="url(#map-dots)"><path d="m38 70 30-20 45 8 18-15 42 2 20 14 30-4 20 26-16 20-15 3-10 28-17 8-7 29-21 9-17-29-27-4-16-21-28-8-10-21-21-5ZM152 156l28-8 32 19 20 16-4 34-13 19-12 30-13 21-17-27-3-31-17-27-9-25ZM227 39l29-19 34 7 8 23-20 23-32-10ZM306 78l23-20 25 4 17-12 21 8 21-5 26-17 41 8 33 17 36-3 39 24 22 8-8 29-30 7-21-8-19 21-23 4-9 35-27-12-12-33-21-3-25-11-22 9-4-13-16-3-11-13-17 5ZM316 124l32-12 31 12 22 31-10 29-18 18-13 37-20-9-8-24-18-19-17-35ZM434 160l17 5 18 20-7 15-18-15ZM492 186l27-9 10 14 28 7-4 10-27-8-13-7ZM519 225l38-16 33 20 11 26-17 10-23-8-27 8-24-14ZM397 220l9-10 7 20-7 14-9-9Z"/></g><path d="M75 178Q273-8 491 203" stroke="#56dca8" stroke-width="1.2" stroke-dasharray="4 7" fill="none" opacity=".25"/><path d="M198 241Q329 76 482 87" stroke="#56dca8" stroke-width="1" stroke-dasharray="3 7" fill="none" opacity=".16"/></svg>
+              </div>
+              <div class="route-footer"><span class="route-icon"><svg><use href="#i-globe"/></svg></span><div><strong id="route-name">Your server, your choice</strong><span id="route-description">Bring a WireGuard .conf profile</span></div><svg><use href="#i-arrow"/></svg></div>
+            </article>
+          </div>
+          <div class="metrics">
+            <div class="metric card"><span class="metric-icon green"><svg><use href="#i-bolt"/></svg></span><div><span class="metric-label">ENDPOINT LATENCY</span><div class="metric-value"><span id="metric-latency">—</span><small>ms</small></div></div><span class="metric-note" id="latency-note">Not measured</span></div>
+            <div class="metric card"><span class="metric-icon blue"><svg><use href="#i-shield"/></svg></span><div><span class="metric-label">TUNNEL PROTOCOL</span><div class="metric-value protocol-value">WireGuard</div></div><span class="metric-note">UDP</span></div>
+            <div class="metric card"><span class="metric-icon purple"><svg><use href="#i-clock"/></svg></span><div><span class="metric-label">SESSION TIME</span><div class="metric-value"><span id="metric-time">00:00:00</span></div></div><span class="metric-note" id="session-note">Inactive</span></div>
+          </div>
+          <article class="servers-card card"><div class="section-topline"><div><h2>Your server profiles <span class="inline-count profile-count">0</span></h2><p>Find the shortest round trip to your next connection.</p></div><button class="button button-small measure-button" disabled><svg><use href="#i-refresh"/></svg>Check latency</button></div><div class="server-list" id="overview-servers"></div></article>
+          <div class="bottom-note"><svg><use href="#i-info"/></svg><span>Latency is measured to the server endpoint. Actual tunnel performance depends on your network and server.</span><span class="bottom-brand">BUILT FOR YOUR EVERYDAY</span></div>
+        </section>
+        <section class="page" id="page-profiles" hidden><div class="page-heading"><div><div class="eyebrow">BRING YOUR OWN ROUTE</div><h1>Server profiles.</h1><p>Your WireGuard connections, all in one place.</p></div><button class="button button-primary import-button"><svg><use href="#i-plus"/></svg>Import profile</button></div><article class="card profiles-panel"><div class="section-topline"><div><h2>Available connections</h2><p>Select a profile or compare endpoint latency.</p></div><button class="button button-small measure-button" disabled><svg><use href="#i-refresh"/></svg>Check latency</button></div><div class="server-list" id="profile-servers"></div></article><div class="info-panel"><svg><use href="#i-lock"/></svg><div><strong>Your credentials stay local.</strong><p>Profiles are stored in your desktop account’s application folder. Private keys never enter this interface and are never uploaded.</p></div></div></section>
+        <section class="page" id="page-settings" hidden><div class="page-heading"><div><div class="eyebrow">MAKE IT YOURS</div><h1>Preferences.</h1><p>A few thoughtful defaults. You’re in control.</p></div></div><article class="card settings-card"><div class="settings-title"><svg><use href="#i-bolt"/></svg><h2>Connection preference</h2></div><div class="setting-row"><div><strong>Prefer the fastest measured endpoint</strong><p>Check all profiles before connecting and choose the lowest available round-trip time.</p></div><label class="switch"><input type="checkbox" id="fastest-toggle" aria-label="Prefer the fastest measured endpoint"><span></span></label></div><p class="setting-footnote">ICMP latency is a useful hint, not a speed guarantee. If no endpoint responds, Aero uses your selected profile. An active tunnel can affect measurements.</p></article><article class="card settings-card"><div class="settings-title"><svg><use href="#i-shield"/></svg><h2>WireGuard engine</h2></div><div class="engine-status"><span class="status-dot" id="engine-dot"></span><strong id="engine-label">Checking system tools…</strong></div><p id="engine-instructions"></p><button class="button button-secondary docs-button">WireGuard installation guide<svg><use href="#i-arrow"/></svg></button></article><article class="card settings-card"><h2>Clear boundaries</h2><p>Aero manages your own server profiles. It does not provide VPN servers, a kill switch, or automatic reconnection. Your profile controls DNS and IPv4 / IPv6 coverage. Closing the app can leave the system tunnel running.</p></article></section>
+        <section class="page" id="page-help" hidden><div class="page-heading"><div><div class="eyebrow">YOUR FIRST CONNECTION</div><h1>Three steps to take off.</h1><p>Aero is the client. Your server supplies the route.</p></div></div><div class="setup-steps"><article class="card setup-step"><span class="step-number">01</span><h2>Install WireGuard</h2><p>On Windows, install the official WireGuard client. Aero uses its system service to create and remove tunnels.</p><button class="button button-secondary docs-button">Get WireGuard<svg><use href="#i-arrow"/></svg></button></article><article class="card setup-step"><span class="step-number">02</span><h2>Get a server profile</h2><p>Export a client .conf from your WireGuard server or a provider that supports WireGuard configuration downloads. Each device needs its own private key.</p><span class="step-tag">A working server is required</span></article><article class="card setup-step"><span class="step-number">03</span><h2>Import & connect</h2><p>Import your profile, check latency, and connect. Windows will request administrator approval for the tunnel service.</p><button class="button button-primary import-button">Import a profile<svg><use href="#i-arrow"/></svg></button></article></div><div class="info-panel"><svg><use href="#i-info"/></svg><div><strong>What does “tunnel active” mean?</strong><p>The system has started your WireGuard interface or service. It does not confirm a successful peer handshake or Internet reachability. Check the official WireGuard client for handshake status; test a site after connecting.</p></div></div><div class="info-panel"><svg><use href="#i-bolt"/></svg><div><strong>For a lower-latency connection</strong><p>Choose a server near you, compare endpoint latency while disconnected, and keep the server’s recommended MTU. Congestion, distance, and server load still determine real performance.</p></div></div></section>
+      </div>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" hidden><svg><use href="#i-info"/></svg><span></span><button id="dismiss-toast" aria-label="Dismiss notification">×</button></div>
+  <dialog id="remove-dialog"><h2>Remove this profile?</h2><p>This removes its local configuration and private key. It won’t delete the peer on your server.</p><div class="dialog-actions"><button class="button button-secondary" id="cancel-remove">Keep profile</button><button class="button button-danger" id="confirm-remove">Remove profile</button></div></dialog>
+</body>
+</html>
